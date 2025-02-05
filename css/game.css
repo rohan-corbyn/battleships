@@ -1,0 +1,64 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Trebuchet MS (sans-serif)';
+    text-align: center;
+    background-color: dodgerblue;
+    color: white;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+#game-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.gameboard {
+    display: grid;
+    gap: 2px;
+    background-color: navy;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+#player-2-area .cell {
+    cursor: pointer;
+}
+
+#player-2-area .cell:hover {
+    background-color: dodgerblue;
+}
+
+.cell {
+    background-color: lightblue;
+    border: 1px solid navy;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.ship {
+    background-color: grey;
+
+}
+
+.hit {
+    background-color: greenyellow;
+}
+
+.miss {
+    background-color: red;
+}
