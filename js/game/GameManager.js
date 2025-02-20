@@ -1,73 +1,107 @@
-import Player from "../player/Player.js";
-import Ship from "../ship/Ship.js";
 import GameRenderer from "./GameRenderer.js";
+import Harbour from "../harbour/harbour.js";
 
 class GameManager {
+  INIT_PHASE = 0;
+  PLACING_PHASE = 1;
+  GAME_PHASE = 2;
+
   currrentTurn = 1;
 
-  constructor(pvp, gameboardXSize, gameboardYSize) {
-    this.player1 = new Player(true, false, gameboardXSize, gameboardYSize);
-    this.player2 = new Player(false, !pvp, gameboardXSize, gameboardYSize);
+  constructor(player1, player2, numShips, boardSize) {
+    this.player1 = player1;
+    this.player2 = player2;
+    this.numShips = numShips;
+    this.boardSize = boardSize;
+    this.phase = this.INIT_PHASE;
     this.gameRenderer = new GameRenderer();
-    this.createDummyGame();
-    this.gameRenderer.renderGameArea(this.player1, this.player2);
-    this.playGame();
+    this.beginPlacingPhase();
   }
 
-  createDummyGame() {
-    const ship1 = new Ship(2);
-    this.player1.gameboard.placeShip(1, 1, ship1);
-
-    const ship2 = new Ship(2);
-    this.player2.gameboard.placeShip(0, 0, ship2);
-  }
-
-  playGame() {
-    document.querySelector("#player-2-area").addEventListener("click", (e) => {
-      if (this.currrentTurn === 1) {
-        if (e.target.classList.contains("cell")) {
-          this.player2.gameboard.receiveAttack(
-            e.target.getAttribute("data-row"),
-            e.target.getAttribute("data-col")
-          );
-          this.gameRenderer.updateGameState(this.player2);
-        }
-        if (this.player2.gameboard.areAllShipsSunk()) {
-          document.querySelector("body").innerHTML = "player 1 wins";
-        } else {
-          if (this.player2.isAI) {
-            this.player2.playRandomAttack(this.player1.gameboard);
-            this.gameRenderer.updateGameState(this.player1);
-            if (this.player1.gameboard.areAllShipsSunk()) {
-              document.querySelector("body").innerHTML = "player 2 wins";
-            }
-          } else {
-            this.currrentTurn = 2;
-          }
-        }
-      }
-    });
-
-    if (!this.player2.isAI) {
-      document
-        .querySelector("#player-1-area")
-        .addEventListener("click", (e) => {
-          if (this.currrentTurn === 2) {
-            if (e.target.classList.contains("cell")) {
-              this.player1.gameboard.receiveAttack(
-                e.target.getAttribute("data-row"),
-                e.target.getAttribute("data-col")
-              );
-              this.gameRenderer.updateGameState(this.player1);
-            }
-            if (this.player1.gameboard.areAllShipsSunk()) {
-              document.querySelector("body").innerHTML = "player 2 wins";
-            } else {
-              this.currrentTurn = 1;
-            }
-          }
-        });
+  async addGameEvents() {
+    if (!this.player1.isAI) {
+      this.addPlayerClickEvents(this.player1, this.player2);
     }
+    if (!this.player2.isAI) {
+      this.addPlayerClickEvents(this.player2, this.player1);
+    }
+    if (this.player1.isAI && this.player2.isAI) {
+      this.playAIGame();
+    }
+  }
+
+  beginPlacingPhase() {
+    this.phase = this.PLACING_PHASE;
+    this.gameRenderer.renderGameArea(this.player1);
+    this.harbour = new Harbour(this.player1, this.numShips);
+    this.gameRenderer.renderHarbour(this.harbour);
+    this.harbour.addEvents(this.gameRenderer);
+  }
+
+  beginGamePhase() {
+    this.phase = this.GAME_PHASE;
+    this.addGameEvents();
+  }
+
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  addPlayerClickEvents(player, opponent) {
+    console.log(opponent);
+    document
+      .getElementById(opponent.gameAreaId)
+      .addEventListener("click", (e) => {
+        if (this.currrentTurn === player.position) {
+          if (e.target.classList.contains("cell")) {
+            opponent.gameboard.receiveAttack(
+              e.target.getAttribute("data-row"),
+              e.target.getAttribute("data-col")
+            );
+            this.gameRenderer.updateGameState(opponent);
+          }
+          if (opponent.gameboard.areAllShipsSunk()) {
+            this.displayEndGame(player);
+          } else {
+            if (opponent.isAI) {
+              opponent.playRandomAttack(player.gameboard);
+              this.gameRenderer.updateGameState(player);
+              if (opponent.gameboard.areAllShipsSunk()) {
+                this.displayEndGame(opponent);
+              }
+            } else {
+              this.currrentTurn = opponent.position;
+            }
+          }
+        }
+      });
+  }
+
+  async playAIGame() {
+    while (
+      !this.player1.gameboard.areAllShipsSunk() &&
+      !this.player2.gameboard.areAllShipsSunk()
+    ) {
+      this.player1.playRandomAttack(this.player2.gameboard);
+      this.gameRenderer.updateGameState(this.player2);
+      await this.sleep(50);
+      if (this.player2.gameboard.areAllShipsSunk()) {
+        this.displayEndGame(this.player1);
+        return;
+      }
+
+      this.player2.playRandomAttack(this.player1.gameboard);
+      this.gameRenderer.updateGameState(this.player1);
+      await this.sleep(50);
+      if (this.player1.gameboard.areAllShipsSunk()) {
+        this.displayEndGame(this.player2);
+        return;
+      }
+    }
+  }
+
+  displayEndGame(winner) {
+    document.querySelector("body").innerHTML = winner.name + " wins";
   }
 }
 

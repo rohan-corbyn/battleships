@@ -1,10 +1,13 @@
 import Gameboard from "../gameboard/Gameboard.js";
 
 class Player {
-  constructor(isPlayer1, isAI, gameboardXSize, gameboardYSize) {
+  constructor(position, name, settings) {
+    this.position = position;
+    const isPlayer1 = this.position === 1;
+    this.name = name ? name : isPlayer1 ? "Player 1" : "Player 2";
     this.gameAreaId = isPlayer1 ? "player-1-area" : "player-2-area";
-    this.isAI = isAI;
-    this.gameboard = new Gameboard(gameboardXSize, gameboardYSize);
+    this.isAI = isPlayer1 ? settings.player1IsAI : settings.player2IsAI;
+    this.gameboard = new Gameboard(settings.gameboardSize);
   }
 
   playRandomAttack(otherPlayerGameboard) {

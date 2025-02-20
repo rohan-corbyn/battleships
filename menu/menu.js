@@ -1,6 +1,15 @@
-import GameManager from "../js/game/GameManager.js";
-
 class Menu {
+  INPUT_IDS = {
+    player1IsAICheckbox: "player-1-ai-checkbox",
+    player2IsAICheckbox: "player-2-ai-checkbox",
+    gameboardSizeInput: "gameboard-size-number",
+  };
+
+  constructor(startGameFunction) {
+    this.renderMenu();
+    this.startGameFunction = startGameFunction;
+  }
+
   renderMenu() {
     const menu = document.createElement("div");
     menu.className = "menu-container";
@@ -42,7 +51,6 @@ class Menu {
     const isPlayer1AILabel = document.createElement("label");
     isPlayer1AILabel.innerText = "Player 1 AI";
     const isPlayer1AICheckbox = document.createElement("input");
-    isPlayer1AICheckbox.id = "player-1-ai-checkbox";
     isPlayer1AICheckbox.type = "checkbox";
     isPlayer1AIContainer.append(isPlayer1AILabel, isPlayer1AICheckbox);
 
@@ -51,19 +59,33 @@ class Menu {
     const isPlayer2AILabel = document.createElement("label");
     isPlayer2AILabel.innerText = "Player 2 AI";
     const isPlayer2AICheckbox = document.createElement("input");
-    isPlayer2AICheckbox.id = "player-2-ai-checkbox";
     isPlayer2AICheckbox.type = "checkbox";
     isPlayer2AIContainer.append(isPlayer2AILabel, isPlayer2AICheckbox);
 
+    const gameboardSizeContainer = document.createElement("div");
+    gameboardSizeContainer.className = "checkbox-container";
+    const gameboardSizeLabel = document.createElement("label");
+    gameboardSizeLabel.innerText = "Gameboard Size";
+    const gameboardSizeInput = document.createElement("input");
+    gameboardSizeInput.type = "number";
+    gameboardSizeInput.defaultValue = 5;
+    gameboardSizeContainer.append(gameboardSizeLabel, gameboardSizeInput);
+
     const startGameButton = document.createElement("button");
     startGameButton.className = "menu-button";
+    startGameButton.id = "start-game-button";
     startGameButton.innerText = "Start Game";
-    startGameButton.onclick = () => this.startGame();
+
+    isPlayer1AICheckbox.id = this.INPUT_IDS.player1IsAICheckbox;
+    isPlayer2AICheckbox.id = this.INPUT_IDS.player2IsAICheckbox;
+    gameboardSizeInput.id = this.INPUT_IDS.gameboardSizeInput;
+    startGameButton.onclick = this.startGameFunction;
 
     menu.append(
       menuTitle,
       isPlayer1AIContainer,
       isPlayer2AIContainer,
+      gameboardSizeContainer,
       startGameButton
     );
 
@@ -82,15 +104,6 @@ class Menu {
 
   showCreditsMenu() {
     alert("Game developed by Rohan Corbyn!");
-  }
-
-  startGame() {
-    // to be implemented as working options when starting the game.
-    // const player1AI = document.getElementById("player-1-ai-checkbox").checked;
-    // const player2AI = document.getElementById("player-2-ai-checkbox").checked;
-    // const boardSize ...
-    document.getElementById("game-area").innerHTML = "";
-    const gameManager = new GameManager(false, 4, 4);
   }
 }
 

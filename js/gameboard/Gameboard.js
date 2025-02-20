@@ -1,11 +1,19 @@
 class Gameboard {
-  constructor(rows, columns) {
-    this.shipArray = Array.from({ length: rows }, () =>
-      Array(columns).fill(null)
-    );
-    this.attackArray = Array.from({ length: rows }, () =>
-      Array(columns).fill(null)
-    );
+  constructor(gameboardSize) {
+    console.log(gameboardSize);
+    const rows = gameboardSize;
+    const columns = gameboardSize;
+    this.shipArray = [];
+    this.attackArray = [];
+
+    for (let i = 0; i < rows; i++) {
+      this.shipArray[i] = [];
+      this.attackArray[i] = [];
+      for (let j = 0; j < columns; j++) {
+        this.shipArray[i][j] = "E";
+        this.attackArray[i][j] = "E";
+      }
+    }
 
     this.shipsPlaced = 0;
     this.shipsSunk = 0;
@@ -13,24 +21,35 @@ class Gameboard {
     this.columns = columns;
   }
 
-  placeShip(x, y, ship, horizontal = true) {
-    if (horizontal) {
-      for (let i = 0; i < ship.length; i++) {
-        if (this.shipArray[x][y + i]) {
-          throw new Error("A ship is already occupying this space.");
+  canPlaceShip(ship, position) {
+    if (ship.isHorizontal) {
+      for (let i = 0; i > -ship.length; i--) {
+        if (this.isSquareAvailable(position.row, position.col + i)) {
+          return false;
         }
-      }
-      for (let i = 0; i < ship.length; i++) {
-        this.shipArray[x][y + i] = ship;
       }
     } else {
-      for (let i = 0; i < ship.length; i++) {
-        if (this.shipArray[x + i][y]) {
-          throw new Error("A ship is already occupying this space.");
+      for (let i = 0; i > -ship.length; i--) {
+        if (this.isSquareAvailable(position.row + i, position.col)) {
+          return false;
         }
       }
-      for (let i = 0; i < ship.length; i++) {
-        this.shipArray[x + i][y] = ship;
+    }
+    return true;
+  }
+
+  isSquareAvailable(row, col) {
+    return !this.shipArray[row] || this.shipArray[row][col] !== "E";
+  }
+
+  placeShip(ship, position) {
+    if (ship.isHorizontal) {
+      for (let i = 0; i > -ship.length; i--) {
+        this.shipArray[position.row][position.col + i] = ship;
+      }
+    } else {
+      for (let i = 0; i > -ship.length; i--) {
+        this.shipArray[position.row + i][position.col] = ship;
       }
     }
     this.shipsPlaced++;
