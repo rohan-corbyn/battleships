@@ -1,5 +1,5 @@
-import Gameboard from "./gameboard";
-import Ship from "../ship/ship";
+import Gameboard from "./Gameboard";
+import Ship from "../ship/Ship";
 
 describe("testing gameboard", () => {
   test("testing placeShip i unoccupied location", () => {
